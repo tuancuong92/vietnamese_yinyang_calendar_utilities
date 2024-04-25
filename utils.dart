@@ -1,14 +1,44 @@
 import 'dart:math';
 
-const THIEN_CAN_LIST = ['Giáp', 'Ất', 'Bính', 'Đinh', 'Mậu', 'Kỷ', 'Canh', 'Tân', 'Nhâm', 'Quý'];
-const DIA_CHI_LIST = ['Tí', 'Sửu', 'Dần', 'Mão', 'Thìn', 'Tị', 'Ngọ', 'Mùi', 'Thân', 'Dậu', 'Tuất', 'Hợi'];
+const THIEN_CAN_LIST = [
+  'Giáp',
+  'Ất',
+  'Bính',
+  'Đinh',
+  'Mậu',
+  'Kỷ',
+  'Canh',
+  'Tân',
+  'Nhâm',
+  'Quý'
+];
+const DIA_CHI_LIST = [
+  'Tí',
+  'Sửu',
+  'Dần',
+  'Mão',
+  'Thìn',
+  'Tị',
+  'Ngọ',
+  'Mùi',
+  'Thân',
+  'Dậu',
+  'Tuất',
+  'Hợi'
+];
 
 int jdFromDate(int dd, int mm, int yy) {
   int a, y, m, jd;
   a = ((14 - mm) / 12).floor();
   y = yy + 4800 - a;
   m = mm + 12 * a - 3;
-  jd = dd + ((153 * m + 2) / 5).floor() + 365 * y + (y / 4).floor() - (y / 100).floor() + (y / 400).floor() - 32045;
+  jd = dd +
+      ((153 * m + 2) / 5).floor() +
+      365 * y +
+      (y / 4).floor() -
+      (y / 100).floor() +
+      (y / 400).floor() -
+      32045;
   if (jd < 2299161) {
     jd = dd + ((153 * m + 2) / 5).floor() + 365 * y + (y / 4).floor() - 32083;
   }
@@ -53,7 +83,11 @@ int getNewMoonDay(int k, int timeZone) {
   C1 = C1 - 0.0004 * sin(dr * (2 * F - M)) - 0.0006 * sin(dr * (2 * F + Mpr));
   C1 = C1 + 0.0010 * sin(dr * (2 * F - Mpr)) + 0.0005 * sin(dr * (2 * Mpr + M));
   if (T < -11) {
-    deltat = 0.001 + 0.000839 * T + 0.0002261 * T2 - 0.00000845 * T3 - 0.000000081 * T * T3;
+    deltat = 0.001 +
+        0.000839 * T +
+        0.0002261 * T2 -
+        0.00000845 * T3 -
+        0.000000081 * T * T3;
   } else {
     deltat = -0.000278 + 0.000265 * T + 0.000262 * T2;
   }
@@ -69,7 +103,9 @@ int getSunLongitude(int jdn, int timeZone) {
   M = 357.52910 + 35999.05030 * T - 0.0001559 * T2 - 0.00000048 * T * T2;
   L0 = 280.46645 + 36000.76983 * T + 0.0003032 * T2;
   DL = (1.914600 - 0.004817 * T - 0.000014 * T2) * sin(dr * M);
-  DL = DL + (0.019993 - 0.000101 * T) * sin(dr * 2 * M) + 0.000290 * sin(dr * 3 * M);
+  DL = DL +
+      (0.019993 - 0.000101 * T) * sin(dr * 2 * M) +
+      0.000290 * sin(dr * 3 * M);
   L = L0 + DL;
   L = L * dr;
   L = L - 3.141592653589793 * 2 * (L / (3.141592653589793 * 2)).floor();
@@ -103,7 +139,15 @@ int getLeapMonthOffset(double a11, int timeZone) {
 }
 
 Map<String, dynamic> convertSolar2Lunar(int dd, int mm, int yy, int timeZone) {
-  int k, dayNumber, monthStart, a11, b11, lunarDay, lunarMonth, lunarYear, lunarLeap;
+  int k,
+      dayNumber,
+      monthStart,
+      a11,
+      b11,
+      lunarDay,
+      lunarMonth,
+      lunarYear,
+      lunarLeap;
   dayNumber = jdFromDate(dd, mm, yy);
   k = ((dayNumber - 2415021.076998695) / 29.530588853).floor();
   monthStart = getNewMoonDay(k + 1, timeZone);
@@ -139,7 +183,7 @@ Map<String, dynamic> convertSolar2Lunar(int dd, int mm, int yy, int timeZone) {
     lunarYear -= 1;
   }
   String canChiDate = getCanChiDateByJd(dayNumber);
-  String canchiMonth = getCanChiMonth(lunarMonth, lunarYear);
+  String canChiMonth = getCanChiMonth(lunarMonth, lunarYear);
   String canChiYear = getCanChiYear(lunarYear);
   return {
     'lunarDay': lunarDay,
@@ -147,7 +191,7 @@ Map<String, dynamic> convertSolar2Lunar(int dd, int mm, int yy, int timeZone) {
     'lunarYear': lunarYear,
     'lunarLeap': lunarLeap,
     'canChiDate': canChiDate,
-    'canchiMonth': canchiMonth,
+    'canchiMonth': canChiMonth,
     'canChiYear': canChiYear
   };
 }

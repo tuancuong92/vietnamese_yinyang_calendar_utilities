@@ -143,9 +143,9 @@ func convertSolar2Lunar(dd, mm, yy, timeZone int) (int, int, int, int, string, s
 		lunarYear -= 1
 	}
 	canChiDate := getCanChiDateByJd(dayNumber)
-	canchiMonth := getCanChiMonth(lunarMonth, lunarYear)
+	canChiMonth := getCanChiMonth(lunarMonth, lunarYear)
 	canChiYear := getCanChiYear(lunarYear)
-	return lunarDay, lunarMonth, lunarYear, lunarLeap, canChiDate, canchiMonth, canChiYear
+	return lunarDay, lunarMonth, lunarYear, lunarLeap, canChiDate, canChiMonth, canChiYear
 }
 
 func convertLunar2Solar(lunarDay, lunarMonth, lunarYear, lunarLeap, timeZone int) (int, int, int) {

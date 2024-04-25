@@ -137,9 +137,9 @@ function convertSolar2Lunar(dd, mm, yy, timeZone) {
         lunarYear -= 1;
     }
     const canChiDate = getCanChiDateByJd(dayNumber);
-    const canchiMonth = getCanChiMonth(lunarMonth, lunarYear)
+    const canChiMonth = getCanChiMonth(lunarMonth, lunarYear)
     const canChiYear = getCanChiYear(lunarYear);
-    return {lunarDay, lunarMonth, lunarYear, lunarLeap, canChiDate, canchiMonth, canChiYear};
+    return {lunarDay, lunarMonth, lunarYear, lunarLeap, canChiDate, canChiMonth, canChiYear};
 }
 
 function convertLunar2Solar({lunarDay, lunarMonth, lunarYear, lunarLeap, timeZone}) {
