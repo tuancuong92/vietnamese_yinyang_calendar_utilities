@@ -1,5 +1,13 @@
 const THIEN_CAN_LIST = ['Giáp', 'Ất', 'Bính', 'Đinh', 'Mậu', 'Kỷ', 'Canh', 'Tân', 'Nhâm', 'Quý'];
 const DIA_CHI_LIST = ['Tí', 'Sửu', 'Dần', 'Mão', 'Thìn', 'Tị', 'Ngọ', 'Mùi', 'Thân', 'Dậu', 'Tuất', 'Hợi'];
+const TIET_KHI_LIST = [
+    "Lập Xuân", "Vũ Thủy", "Kinh Trập", "Xuân Phân",
+    "Thanh Minh", "Cốc Vũ", "Lập Hạ", "Tiểu Mãn",
+    "Mang Chủng", "Hạ Chí", "Tiểu Thử", "Đại Thử",
+    "Lập Thu", "Xử Thử", "Bạch Lộ", "Thu Phân",
+    "Hàn Lộ", "Sương Giáng", "Lập Đông", "Tiểu Tuyết",
+    "Đại Tuyết", "Đông Chí", "Tiểu Hàn", "Đại Hàn"
+];
 
 function jdFromDate(dd, mm, yy) {
     let a, y, m, jd;
@@ -188,7 +196,50 @@ function getCanChiMonth(lunarMonth, lunarYear) {
     return `${can} ${chi}`;
 }
 
+function calculateLichLapXuan(year) {
+    // Dữ liệu cơ bản:
+    const baseYear = 1900;
+    const baseDate = new Date(baseYear, 1, 4); // Lập Xuân của năm 1900 là 4 tháng 2
+    const daysPerYear = 365.2422; // Số ngày trung bình trong năm theo quỹ đạo Trái Đất
+  
+    // Tính toán số năm cách từ năm 1900
+    const differenceInYears = year - baseYear;
+  
+    // Tính tổng số ngày đã qua kể từ năm 1900
+    const totalDaysPassed = differenceInYears * daysPerYear;
+  
+    // Tạo đối tượng ngày mới dựa trên số ngày đã qua
+    const lapXuanDate = new Date(baseDate.getTime() + totalDaysPassed * 24 * 60 * 60 * 1000);
+  
+    // Trả về ngày Lập Xuân (kết quả là một đối tượng Date)
+    return lapXuanDate;
+}
+
+function calculateTietKhi(inputDate, lichLapXuan) {
+    // Chuyển đổi ngày nhập vào thành đối tượng Date
+    const date = new Date(inputDate);
+    const lapXuan = new Date(lichLapXuan);
+
+    // Tính số ngày đã trôi qua kể từ ngày Lập Xuân
+    const daysSinceLapXuan = Math.floor((date - lapXuan) / (1000 * 60 * 60 * 24));
+
+    // Xác định tiết khí dựa trên số ngày đã trôi qua
+    const tietKhiIndex = Math.floor(daysSinceLapXuan / 15.2184); // 15.2184 ngày mỗi tiết khí
+
+
+    // Kiểm tra chỉ số tiết khí
+    if (tietKhiIndex < 0) {
+        return "Ngày trước Lập Xuân.";
+    } else if (tietKhiIndex >= TIET_KHI_LIST.length) {
+        return "Ngày sau Đại Hàn.";
+    } else {
+        return `Tiết khí của ngày ${date.toDateString()} là: ${TIET_KHI_LIST[tietKhiIndex]}`;
+    }
+}
+
 module.exports = {
     convertSolar2Lunar,
     convertLunar2Solar,
+    calculateLichLapXuan,
+    calculateTietKhi,
 }

@@ -27,6 +27,33 @@ const DIA_CHI_LIST = [
   'Hợi'
 ];
 
+const TIET_KHI_LIST = [
+  "Lập Xuân",
+  "Vũ Thủy",
+  "Kinh Trập",
+  "Xuân Phân",
+  "Thanh Minh",
+  "Cốc Vũ",
+  "Lập Hạ",
+  "Tiểu Mãn",
+  "Mang Chủng",
+  "Hạ Chí",
+  "Tiểu Thử",
+  "Đại Thử",
+  "Lập Thu",
+  "Xử Thử",
+  "Bạch Lộ",
+  "Thu Phân",
+  "Hàn Lộ",
+  "Sương Giáng",
+  "Lập Đông",
+  "Tiểu Tuyết",
+  "Đại Tuyết",
+  "Đông Chí",
+  "Tiểu Hàn",
+  "Đại Hàn"
+];
+
 int jdFromDate(int dd, int mm, int yy) {
   int a, y, m, jd;
   a = ((14 - mm) / 12).floor();
@@ -245,4 +272,42 @@ String getCanChiMonth(int lunarMonth, int lunarYear) {
   String can = THIEN_CAN_LIST[(lunarYear * 12 + lunarMonth + 3) % 10];
   String chi = DIA_CHI_LIST[(lunarMonth + 1) % 12];
   return '$can $chi';
+}
+
+DateTime calculateLichLapXuan(int year) {
+  // Dữ liệu cơ bản:
+  const baseYear = 1900;
+  final baseDate =
+      DateTime(baseYear, 2, 4); // Lập Xuân của năm 1900 là 4 tháng 2
+  const daysPerYear =
+      365.2422; // Số ngày trung bình trong năm theo quỹ đạo Trái Đất
+
+  // Tính toán số năm cách từ năm 1900
+  final differenceInYears = year - baseYear;
+
+  // Tính tổng số ngày đã qua kể từ năm 1900
+  final totalDaysPassed = differenceInYears * daysPerYear;
+
+  // Tạo đối tượng ngày mới dựa trên số ngày đã qua
+  final lapXuanDate = baseDate.add(Duration(days: totalDaysPassed.round()));
+
+  // Trả về ngày Lập Xuân (kết quả là một đối tượng Date)
+  return lapXuanDate;
+}
+
+String calculateTietKhi(DateTime inputDate, DateTime lichLapXuan) {
+  // Tính số ngày đã trôi qua kể từ ngày Lập Xuân
+  final daysSinceLapXuan = (inputDate.difference(lichLapXuan).inDays);
+
+  // Xác định tiết khí dựa trên số ngày đã trôi qua
+  final tietKhiIndex = (daysSinceLapXuan / 15.2184).floor();
+
+  // Kiểm tra chỉ số tiết khí
+  if (tietKhiIndex < 0) {
+    return "Ngày trước Lập Xuân.";
+  } else if (tietKhiIndex >= TIET_KHI_LIST.length) {
+    return "Ngày sau Đại Hàn.";
+  } else {
+    return TIET_KHI_LIST[tietKhiIndex];
+  }
 }

@@ -3,10 +3,19 @@ package vietnameseyinyangcalendarutils
 import (
 	"fmt"
 	"math"
+	"time"
 )
 
 var THIEN_CAN_LIST = []string{"Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"}
 var DIA_CHI_LIST = []string{"Tí", "Sửu", "Dần", "Mão", "Thìn", "Tị", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi"}
+var TIET_KHI_LIST = []string{
+	"Lập Xuân", "Vũ Thủy", "Kinh Trập", "Xuân Phân",
+	"Thanh Minh", "Cốc Vũ", "Lập Hạ", "Tiểu Mãn",
+	"Mang Chủng", "Hạ Chí", "Tiểu Thử", "Đại Thử",
+	"Lập Thu", "Xử Thử", "Bạch Lộ", "Thu Phân",
+	"Hàn Lộ", "Sương Giáng", "Lập Đông", "Tiểu Tuyết",
+	"Đại Tuyết", "Đông Chí", "Tiểu Hàn", "Đại Hàn",
+}
 
 func jdFromDate(dd, mm, yy int) int {
 	a := int(math.Floor(float64((14 - mm) / 12)))
@@ -194,13 +203,46 @@ func getCanChiMonth(lunarMonth, lunarYear int) string {
 	return fmt.Sprintf("%s %s", can, chi)
 }
 
-// func main() {
-// lunarDay, lunarMonth, lunarYear, lunarLeap, canChiDate, canchiMonth, canChiYear := convertSolar2Lunar(23, 4, 2024, 7)
-// fmt.Printf("Lunar Date: %d/%d/%d (Leap: %d)\n", lunarDay, lunarMonth, lunarYear, lunarLeap)
-// fmt.Printf("Can Chi Date: %s\n", canChiDate)
-// fmt.Printf("Can Chi Month: %s\n", canchiMonth)
-// fmt.Printf("Can Chi Year: %s\n", canChiYear)
+func calculateLichLapXuan(year int) time.Time {
+	// Dữ liệu cơ bản:
+	baseYear := 1900
+	baseDate := time.Date(baseYear, 2, 4, 0, 0, 0, 0, time.UTC) // Lập Xuân của năm 1900 là 4 tháng 2
+	daysPerYear := 365.2422                                     // Số ngày trung bình trong năm theo quỹ đạo Trái Đất
 
-// solarDay, solarMonth, solarYear := convertLunar2Solar(lunarDay, lunarMonth, lunarYear, lunarLeap, 7)
-// fmt.Printf("Solar Date: %d/%d/%d\n", solarDay, solarMonth, solarYear)
+	// Tính toán số năm cách từ năm 1900
+	differenceInYears := year - baseYear
+
+	// Tính tổng số ngày đã qua kể từ năm 1900
+	totalDaysPassed := float64(differenceInYears) * daysPerYear
+
+	// Tạo đối tượng ngày mới dựa trên số ngày đã qua
+	lapXuanDate := baseDate.AddDate(0, 0, int(totalDaysPassed))
+
+	// Trả về ngày Lập Xuân (kết quả là một đối tượng Time)
+	return lapXuanDate
+}
+
+func calculateTietKhi(inputDate time.Time, lichLapXuan time.Time) string {
+	// Tính số ngày đã trôi qua kể từ ngày Lập Xuân
+	daysSinceLapXuan := int64(inputDate.Sub(lichLapXuan).Hours() / 24)
+
+	// Xác định tiết khí dựa trên số ngày đã trôi qua
+	tietKhiIndex := float64(daysSinceLapXuan) / 15.2184 // 15.2184 ngày mỗi tiết khí
+
+	// Kiểm tra chỉ số tiết khí
+	if tietKhiIndex < 0 {
+		return "Ngày trước Lập Xuân."
+	} else if int(tietKhiIndex) >= len(TIET_KHI_LIST) {
+		return "Ngày sau Đại Hàn."
+	} else {
+		return TIET_KHI_LIST[int(tietKhiIndex)]
+	}
+}
+
+// func main() {
+// 	lxDate := calculateLichLapXuan(2024)
+
+// 	today := time.Now()
+// 	tietKhi := calculateTietKhi(today, lxDate)
+// 	fmt.Println(tietKhi)
 // }
