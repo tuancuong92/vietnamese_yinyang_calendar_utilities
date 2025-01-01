@@ -215,26 +215,46 @@ function calculateLichLapXuan(year) {
     return lapXuanDate;
 }
 
-function calculateTietKhi(inputDate, lichLapXuan) {
-    // Chuyển đổi ngày nhập vào thành đối tượng Date
-    const date = new Date(inputDate);
-    const lapXuan = new Date(lichLapXuan);
+function tietKhiIndexToDiaChiMonthIndex(index) {
+    if (index < 0 || index >= TIET_KHI_LIST.length) {
+        throw new RangeError("index out of range");
+    }
+
+    return Math.floor((index + 2) / 2) + 1;
+}
+
+function calculateTietKhi(inputDate) {
+    const year = inputDate.getFullYear();
+    const lichLapXuan = calculateLichLapXuan(year);
 
     // Tính số ngày đã trôi qua kể từ ngày Lập Xuân
-    const daysSinceLapXuan = Math.floor((date - lapXuan) / (1000 * 60 * 60 * 24));
+    const daysSinceLapXuan = Math.floor((inputDate - lichLapXuan) / (1000 * 60 * 60 * 24));
 
     // Xác định tiết khí dựa trên số ngày đã trôi qua
-    const tietKhiIndex = Math.floor(daysSinceLapXuan / 15.2184); // 15.2184 ngày mỗi tiết khí
-
-
-    // Kiểm tra chỉ số tiết khí
-    if (tietKhiIndex < 0) {
-        return "Ngày trước Lập Xuân.";
-    } else if (tietKhiIndex >= TIET_KHI_LIST.length) {
-        return "Ngày sau Đại Hàn.";
-    } else {
-        return `Tiết khí của ngày ${date.toDateString()} là: ${TIET_KHI_LIST[tietKhiIndex]}`;
+    const tietKhiIndex = Math.floor(daysSinceLapXuan / 15.2184);
+    let realTietKhiIndex = tietKhiIndex;
+    if (realTietKhiIndex < 0) {
+        realTietKhiIndex = TIET_KHI_LIST.length + tietKhiIndex;
+    } else if (tietKhiIndex >= TIET_KHI_LIST.length - 1) {
+        realTietKhiIndex = tietKhiIndex % TIET_KHI_LIST.length;
     }
+
+    const tietKhi = TIET_KHI_LIST[realTietKhiIndex];
+
+    const diaChiMonthIndex = tietKhiIndexToDiaChiMonthIndex(realTietKhiIndex);
+    const virtualLunarMonth = diaChiMonthIndex - 1;
+    let virtualLunarYear = year;
+    if (inputDate < lichLapXuan) {
+        virtualLunarYear -= 1;
+    }
+    const canChiYear = getCanChiYear(virtualLunarYear);
+    const canChiMonth = getCanChiMonth(virtualLunarMonth, virtualLunarYear);
+
+    return {
+        'tietKhi': tietKhi,
+        'canChiYear': canChiYear,
+        'canChiMonth': canChiMonth
+    };
 }
 
 module.exports = {

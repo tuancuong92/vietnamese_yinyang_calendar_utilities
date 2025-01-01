@@ -295,19 +295,52 @@ DateTime calculateLichLapXuan(int year) {
   return lapXuanDate;
 }
 
-String calculateTietKhi(DateTime inputDate, DateTime lichLapXuan) {
+int tietKhiIndexToDiaChiMonthIndex(int index) {
+  if (index < 0) {
+    throw Exception("index < 0");
+  }
+
+  if (index >= TIET_KHI_LIST.length) {
+    throw Exception("index shoud be <= 23");
+  }
+
+  // Tháng Dần index = 2 là Lập Xuân & Vũ Thuỷ, index = 0 và 1
+  // Tháng Dần cũng là tháng 1 âm lịch theo lịch vạn niên
+  return ((index + 2) ~/ 2) + 1;
+}
+
+Map<String, String> calculateTietKhi(DateTime inputDate) {
+  int year = inputDate.year;
+  final lichLapXuan = calculateLichLapXuan(year);
+
   // Tính số ngày đã trôi qua kể từ ngày Lập Xuân
   final daysSinceLapXuan = (inputDate.difference(lichLapXuan).inDays);
 
   // Xác định tiết khí dựa trên số ngày đã trôi qua
   final tietKhiIndex = (daysSinceLapXuan / 15.2184).floor();
-
-  // Kiểm tra chỉ số tiết khí
-  if (tietKhiIndex < 0) {
-    return "Ngày trước Lập Xuân.";
-  } else if (tietKhiIndex >= TIET_KHI_LIST.length) {
-    return "Ngày sau Đại Hàn.";
+  var realTietKhiIndex = tietKhiIndex;
+  if (realTietKhiIndex < 0) {
+    realTietKhiIndex = TIET_KHI_LIST.length + tietKhiIndex;
+  } else if (tietKhiIndex >= TIET_KHI_LIST.length - 1) {
+    realTietKhiIndex = tietKhiIndex % TIET_KHI_LIST.length;
   } else {
-    return TIET_KHI_LIST[tietKhiIndex];
+    realTietKhiIndex = tietKhiIndex;
   }
+
+  final tietKhi = TIET_KHI_LIST[realTietKhiIndex];
+
+  final diaChiMonthIndex = tietKhiIndexToDiaChiMonthIndex(realTietKhiIndex);
+  final virtualLunarMonth = diaChiMonthIndex - 1;
+  var virtualLunarYear = inputDate.year;
+  if (inputDate.compareTo(lichLapXuan) == -1) {
+    virtualLunarYear -= 1;
+  }
+  final canChiYear = getCanChiYear(virtualLunarYear);
+  final canChiMonth = getCanChiMonth(virtualLunarMonth, virtualLunarYear);
+
+  return {
+    'tietKhi': tietKhi,
+    'canChiYear': canChiYear,
+    'canChiMonth': canChiMonth
+  };
 }

@@ -222,27 +222,57 @@ func calculateLichLapXuan(year int) time.Time {
 	return lapXuanDate
 }
 
-func calculateTietKhi(inputDate time.Time, lichLapXuan time.Time) string {
+func tietKhiIndexToDiaChiMonthIndex(index int) (int, error) {
+	if index < 0 {
+		return 0, fmt.Errorf("index < 0")
+	}
+
+	if index >= len(TIET_KHI_LIST) {
+		return 0, fmt.Errorf("index should be <= 23")
+	}
+
+	return ((index + 2) / 2) + 1, nil
+}
+
+func calculateTietKhi(inputDate time.Time) (map[string]string, error) {
+	year := inputDate.Year()
+	lichLapXuan := calculateLichLapXuan(year)
+
 	// Tính số ngày đã trôi qua kể từ ngày Lập Xuân
-	daysSinceLapXuan := int64(inputDate.Sub(lichLapXuan).Hours() / 24)
+	daysSinceLapXuan := int(inputDate.Sub(lichLapXuan).Hours() / 24)
 
 	// Xác định tiết khí dựa trên số ngày đã trôi qua
-	tietKhiIndex := float64(daysSinceLapXuan) / 15.2184 // 15.2184 ngày mỗi tiết khí
-
-	// Kiểm tra chỉ số tiết khí
-	if tietKhiIndex < 0 {
-		return "Ngày trước Lập Xuân."
-	} else if int(tietKhiIndex) >= len(TIET_KHI_LIST) {
-		return "Ngày sau Đại Hàn."
-	} else {
-		return TIET_KHI_LIST[int(tietKhiIndex)]
+	tietKhiIndex := daysSinceLapXuan / 15
+	realTietKhiIndex := tietKhiIndex
+	if realTietKhiIndex < 0 {
+		realTietKhiIndex = len(TIET_KHI_LIST) + tietKhiIndex
+	} else if tietKhiIndex >= len(TIET_KHI_LIST)-1 {
+		realTietKhiIndex = tietKhiIndex % len(TIET_KHI_LIST)
 	}
+
+	tietKhi := TIET_KHI_LIST[realTietKhiIndex]
+
+	diaChiMonthIndex, err := tietKhiIndexToDiaChiMonthIndex(realTietKhiIndex)
+	if err != nil {
+		return nil, err
+	}
+	virtualLunarMonth := diaChiMonthIndex - 1
+	virtualLunarYear := year
+	if inputDate.Before(lichLapXuan) {
+		virtualLunarYear -= 1
+	}
+	canChiYear := getCanChiYear(virtualLunarYear)
+	canChiMonth := getCanChiMonth(virtualLunarMonth, virtualLunarYear)
+
+	return map[string]string{
+		"tietKhi":     tietKhi,
+		"canChiYear":  canChiYear,
+		"canChiMonth": canChiMonth,
+	}, nil
 }
 
 // func main() {
-// 	lxDate := calculateLichLapXuan(2024)
-
 // 	today := time.Now()
-// 	tietKhi := calculateTietKhi(today, lxDate)
+// 	tietKhi, _ := calculateTietKhi(today)
 // 	fmt.Println(tietKhi)
 // }
