@@ -13,12 +13,12 @@ const THIEN_CAN_LIST = [
   'Quý'
 ];
 const DIA_CHI_LIST = [
-  'Tí',
+  'Tý',
   'Sửu',
   'Dần',
   'Mão',
   'Thìn',
-  'Tị',
+  'Tỵ',
   'Ngọ',
   'Mùi',
   'Thân',
@@ -212,6 +212,9 @@ Map<String, dynamic> convertSolar2Lunar(int dd, int mm, int yy, int timeZone) {
   String canChiDate = getCanChiDateByJd(dayNumber);
   String canChiMonth = getCanChiMonth(lunarMonth, lunarYear);
   String canChiYear = getCanChiYear(lunarYear);
+  Map<String, bool> isPhaDate = calculatePhaDate(
+      jdDate: dayNumber, lunarMonth: lunarMonth, year: lunarYear);
+
   return {
     'lunarDay': lunarDay,
     'lunarMonth': lunarMonth,
@@ -219,7 +222,9 @@ Map<String, dynamic> convertSolar2Lunar(int dd, int mm, int yy, int timeZone) {
     'lunarLeap': lunarLeap,
     'canChiDate': canChiDate,
     'canchiMonth': canChiMonth,
-    'canChiYear': canChiYear
+    'canChiYear': canChiYear,
+    'isNguyetPha': isPhaDate['isNguyetPha'],
+    'isTuePha': isPhaDate['isTuePha'],
   };
 }
 
@@ -342,5 +347,30 @@ Map<String, String> calculateTietKhi(DateTime inputDate) {
     'tietKhi': tietKhi,
     'canChiYear': canChiYear,
     'canChiMonth': canChiMonth
+  };
+}
+
+int calculateXungKhacDiaChi(int diaChiIndex) {
+  //Index của Địa chi + 6
+  return (diaChiIndex + 1 + 6) % 12 - 1;
+}
+
+Map<String, bool> calculatePhaDate(
+    {required int jdDate, required int lunarMonth, required int year}) {
+  bool isNguyetPha = false;
+  bool isTuePha = false;
+
+  int dayDiaChiIndex = (jdDate + 1) % 12;
+  int monthDiaChiIndex = (lunarMonth + 1) % 12;
+  int yearDiaChiIndex = (year + 8) % 12;
+
+  int xungKhacIndex = calculateXungKhacDiaChi(dayDiaChiIndex);
+
+  isNguyetPha = xungKhacIndex == monthDiaChiIndex;
+  isTuePha = xungKhacIndex == yearDiaChiIndex;
+
+  return {
+    "isNguyetPha": isNguyetPha,
+    "isTuePha": isTuePha,
   };
 }

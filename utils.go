@@ -7,7 +7,7 @@ import (
 )
 
 var THIEN_CAN_LIST = []string{"Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"}
-var DIA_CHI_LIST = []string{"Tí", "Sửu", "Dần", "Mão", "Thìn", "Tị", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi"}
+var DIA_CHI_LIST = []string{"Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi"}
 var TIET_KHI_LIST = []string{
 	"Lập Xuân", "Vũ Thủy", "Kinh Trập", "Xuân Phân",
 	"Thanh Minh", "Cốc Vũ", "Lập Hạ", "Tiểu Mãn",
@@ -115,7 +115,7 @@ func getLeapMonthOffset(a11, timeZone int) int {
 	return i - 1
 }
 
-func convertSolar2Lunar(dd, mm, yy, timeZone int) (int, int, int, int, string, string, string) {
+func convertSolar2Lunar(dd, mm, yy, timeZone int) (int, int, int, int, string, string, string, bool, bool) {
 	var k, dayNumber, monthStart, a11, b11, lunarDay, lunarMonth, lunarYear, lunarLeap, diff int
 	dayNumber = jdFromDate(dd, mm, yy)
 	k = int(math.Floor(float64((float64(dayNumber) - 2415021.076998695) / 29.530588853)))
@@ -154,7 +154,9 @@ func convertSolar2Lunar(dd, mm, yy, timeZone int) (int, int, int, int, string, s
 	canChiDate := getCanChiDateByJd(dayNumber)
 	canChiMonth := getCanChiMonth(lunarMonth, lunarYear)
 	canChiYear := getCanChiYear(lunarYear)
-	return lunarDay, lunarMonth, lunarYear, lunarLeap, canChiDate, canChiMonth, canChiYear
+	isPhaDate := calculatePhaDate(dayNumber, lunarMonth, lunarYear)
+
+	return lunarDay, lunarMonth, lunarYear, lunarLeap, canChiDate, canChiMonth, canChiYear, isPhaDate["isNguyetPha"], isPhaDate["isTuePha"]
 }
 
 func convertLunar2Solar(lunarDay, lunarMonth, lunarYear, lunarLeap, timeZone int) (int, int, int) {
@@ -269,6 +271,29 @@ func calculateTietKhi(inputDate time.Time) (map[string]string, error) {
 		"canChiYear":  canChiYear,
 		"canChiMonth": canChiMonth,
 	}, nil
+}
+
+func calculateXungKhacDiaChi(diaChiIndex int) int {
+	return (diaChiIndex+1+6)%12 - 1
+}
+
+func calculatePhaDate(jdDate, lunarMonth, year int) map[string]bool {
+	isNguyetPha := false
+	isTuePha := false
+
+	dayDiaChiIndex := (jdDate + 1) % 12
+	monthDiaChiIndex := (lunarMonth + 1) % 12
+	yearDiaChiIndex := (year + 8) % 12
+
+	xungKhacIndex := calculateXungKhacDiaChi(dayDiaChiIndex)
+
+	isNguyetPha = xungKhacIndex == monthDiaChiIndex
+	isTuePha = xungKhacIndex == yearDiaChiIndex
+
+	return map[string]bool{
+		"isNguyetPha": isNguyetPha,
+		"isTuePha":    isTuePha,
+	}
 }
 
 // func main() {
